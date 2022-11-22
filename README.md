@@ -1,4 +1,8 @@
-# Homework 3
+# Sparse-Needle
 
-Public repository and stub/testing code for Homework 3 of 10-714.
+## Installation
+```
+pip install pybind11
+make
+```
 

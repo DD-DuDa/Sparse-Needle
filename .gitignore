@@ -1,0 +1,8 @@
+# ignore .vscode
+.vscode
+
+.pytest_cache
+
+.ipynb_checkpoints
+
+.benchmarks

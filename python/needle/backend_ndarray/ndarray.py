@@ -43,8 +43,12 @@ class BackendDevice:
         # .astype("float32") does work if we're generating a singleton
         return NDArray(np.random.rand(*shape).astype(dtype), device=self)
 
-    def one_hot(self, n, i, dtype="float32"):
-        return NDArray(np.eye(n, dtype=dtype)[i], device=self)
+    def one_hot(self, shape, i, dtype="float32"):
+        # return NDArray(np.eye(n, dtype=dtype)[i], device=self)
+        n = shape[0]
+        mask = np.zeros(shape, dtype=dtype)
+        mask[range(n), i] = 1
+        return mask
 
     def empty(self, shape, dtype="float32"):
         dtype = "float32" if dtype is None else dtype
@@ -244,6 +248,9 @@ class NDArray:
         """
 
         ### BEGIN YOUR SOLUTION
+        if -1 in new_shape:
+            idx = new_shape.index(-1)
+            new_shape = new_shape[:idx] + (np.prod(self._shape[idx:]),)
         if np.prod(self.shape) != np.prod(new_shape):
             raise ValueError
 
@@ -498,6 +505,11 @@ class NDArray:
         self.device.ewise_tanh(self.compact()._handle, out._handle)
         return out
 
+    def ones(self):
+        out = NDArray.make(self.shape, device=self.device)
+        self.device.ones(self.compact()._handle, out._handle)
+        return out
+
     ### Matrix multiplication
     def __matmul__(self, other):
         """Matrix multiplication of two arrays.  This requires that both arrays
@@ -563,15 +575,23 @@ class NDArray:
         return view, out
 
     def sum(self, axis=None):
+        # TODO
         view, out = self.reduce_view_out(axis)
         self.device.reduce_sum(view.compact()._handle, out._handle,
                                view.shape[-1])
+        # if axis == None:
+        #     return out.reshape(())
+        # s = out._handle.array.shape
+        # out = out.reshape(s)
+        
+        # print("out3", out)
         return out
 
     def max(self, axis=None):
         view, out = self.reduce_view_out(axis)
         self.device.reduce_max(view.compact()._handle, out._handle,
                                view.shape[-1])
+        
         return out
 
 

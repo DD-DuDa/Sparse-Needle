@@ -3,6 +3,7 @@
 import needle
 from typing import List, Optional, NamedTuple, Tuple, Union
 from collections import namedtuple
+import needle.init as init
 import numpy
 
 # needle version
@@ -281,6 +282,7 @@ class Tensor(Value):
             if out_grad
             else init.ones(*self.shape, dtype=self.dtype, device=self.device)
         )
+        # out_grad = out_grad if out_grad else Tensor(numpy.ones(self.shape))
         compute_gradient_of_variables(self, out_grad)
 
     def __repr__(self):
@@ -369,6 +371,7 @@ def compute_gradient_of_variables(output_tensor, out_grad):
     reverse_topo_order = list(reversed(find_topo_sort([output_tensor])))
 
     ### BEGIN YOUR SOLUTION
+    # print("topo:", reverse_topo_order)
     for node in reverse_topo_order:
         adjoint = node_to_output_grads_list[node]
         v_i = sum(adjoint)

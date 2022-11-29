@@ -5,6 +5,7 @@ from needle.autograd import Tensor
 from needle import ops
 import needle.init as init
 import numpy as np
+from .backend_selection import array_api, NDArray
 
 
 class Parameter(Tensor):
@@ -88,8 +89,7 @@ class Linear(Module):
         self.out_features = out_features
         
         ### BEGIN YOUR SOLUTION
-        self.weight = Parameter(init.kaiming_uniform(self.in_features, self.out_features))
-        print(self.weight)
+        self.weight = Parameter(init.kaiming_uniform(self.in_features, self.out_features), device=device, dtype=dtype)
         self.bias = Parameter(init.kaiming_uniform(self.out_features, 1).reshape((1, self.out_features))) if bias else None
         ### END YOUR SOLUTION
 
@@ -101,7 +101,6 @@ class Linear(Module):
             ret += ops.broadcast_to(self.bias, ret.shape)
         return ret
         ### END YOUR SOLUTION
-
 
 
 class Flatten(Module):

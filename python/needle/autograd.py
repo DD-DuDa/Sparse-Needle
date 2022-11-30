@@ -297,6 +297,10 @@ class Tensor(Value):
             return data
         return data.numpy()
 
+    def cuda(self):
+        data = self.realize_cached_data()
+        return Tensor(data, device=needle.cuda())
+
     def __add__(self, other):
         if isinstance(other, Tensor):
             return needle.ops.EWiseAdd()(self, other)

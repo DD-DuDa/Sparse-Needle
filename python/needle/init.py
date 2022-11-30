@@ -46,7 +46,8 @@ def randb(*shape, p=0.5, device=None, dtype="bool", requires_grad=False):
 
 def one_hot(n, i, device=None, dtype="float32", requires_grad=False):
     """ Generate one-hot encoding Tensor """
-    device = ndl.cpu_numpy() if device is None else device
+    # device = ndl.cpu_numpy() if device is None else device
+    device = i.device
     # return ndl.Tensor(device.one_hot(n, i.numpy().astype('int'), dtype=dtype), device=device, requires_grad=requires_grad)
     return ndl.Tensor(device.one_hot(n, i.numpy().astype('int'), dtype=dtype), device=device, requires_grad=requires_grad)
 

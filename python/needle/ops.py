@@ -103,7 +103,6 @@ class EWiseMul(TensorOp):
         lhs, rhs = node.inputs
         return out_grad * rhs, out_grad * lhs
 
-
 def multiply(a, b):
     return EWiseMul()(a, b)
 
@@ -254,7 +253,7 @@ class BroadcastTo(TensorOp):
         for i, dim in enumerate(ipt.shape):
             if dim == 1:
                 grad = grad.cached_data.sum(axis=i)
-            grad = Tensor(grad)
+            grad = Tensor(grad, device=grad.device)
 
         grad = reshape(grad, ipt.shape)
         return [grad]
@@ -276,8 +275,9 @@ class Summation(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        # TODO?
+        # TODO numpy ops -> cuda
         ipt = node.inputs[0]
+
         if self.axes:
             # print("grad1", out_grad.cached_data)
             # grad = np.expand_dims(out_grad.cached_data, self.axes)
@@ -293,7 +293,7 @@ class Summation(TensorOp):
                     grad = np.repeat(grad, r, a)
         else:
             grad = np.ones(ipt.cached_data.shape) * out_grad.cached_data.numpy()
-        grad = Tensor(grad)
+        grad = Tensor(grad, device=ipt.device)
         return [grad]
         ### END YOUR SOLUTION
 
@@ -396,7 +396,8 @@ class ReLU(TensorOp):
         ### BEGIN YOUR SOLUTION
         ipt = node.inputs[0]
         grad = Tensor(
-            (ipt.cached_data > 0)) * out_grad
+            (ipt.cached_data > 0), device=ipt.device) * out_grad
+        
         return [grad]
         ### END YOUR SOLUTION
 

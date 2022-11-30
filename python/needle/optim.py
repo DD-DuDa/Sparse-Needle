@@ -61,10 +61,13 @@ class Adam(Optimizer):
     def step(self):
         ### BEGIN YOUR SOLUTION
         self.t += 1
+        # print(self.params.shape)
         for para in self.params:
             m = self.m.get(para)
             v = self.v.get(para)
             grad = para.grad.detach() + self.weight_decay * para.detach()
+            # c = self.weight_decay * para.detach()
+            # grad = para.grad.detach() + c
             m_new = (1 -
                      self.beta1) * grad + self.beta1 * (0 if m == None else m)
             v_new = (1 - self.beta2) * (grad**2) + self.beta2 * (0 if v == None

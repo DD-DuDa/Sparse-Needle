@@ -3,6 +3,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <cublas_v2.h>
+
 #include <iostream>
 #include <sstream>
 
@@ -481,18 +483,26 @@ void Matmul(const CudaArray& a, const CudaArray& b, CudaArray* out, uint32_t M, 
    */
 
   /// BEGIN YOUR SOLUTION
-  Fill(out, 0.0f);
-  if (M < TILE || P < TILE || N < TILE) {
-      dim3 block(TILE, TILE);
-      dim3 grid((M - 1) / TILE + 1, (P - 1) / TILE + 1);
-      MatmulKernel_naive<<<grid, block>>>(a.ptr, b.ptr, out->ptr, M, N, P);
-  } else {
-      dim3 block(TILE, TILE);
-      dim3 grid((M - 1) / TILE + 1, (P - 1) / TILE + 1);
-      MatmulKernel_tile<<<grid, block>>>(a.ptr, b.ptr, out->ptr, M, N, P);
-  }
+    Fill(out, 0.0f);
+    if (M < TILE || P < TILE || N < TILE) {
+        dim3 block(TILE, TILE);
+        dim3 grid((M - 1) / TILE + 1, (P - 1) / TILE + 1);
+        MatmulKernel_naive<<<grid, block>>>(a.ptr, b.ptr, out->ptr, M, N, P);
+    } else {
+        dim3 block(TILE, TILE);
+        dim3 grid((M - 1) / TILE + 1, (P - 1) / TILE + 1);
+        MatmulKernel_tile<<<grid, block>>>(a.ptr, b.ptr, out->ptr, M, N, P);
+    }
+    // cudaDeviceSynchronize();
   /// END YOUR SOLUTION
+    // cublasHandle_t cublas_handle;
+    // cublasCreate(&cublas_handle);
+    // float cublas_alpha = 1.0f;
+    // float cublas_beta = 0.0f;
 
+    // cublasSgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_N, P, M, N, &cublas_alpha, b.ptr, P, a.ptr, N, &cublas_beta, out->ptr, P);
+    // // delete a;
+    // cublasDestroy(cublas_handle);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

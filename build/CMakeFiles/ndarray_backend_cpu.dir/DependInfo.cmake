@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/duda/project/needle/src/ndarray_backend_cpu.cc" "/home/duda/project/needle/build/CMakeFiles/ndarray_backend_cpu.dir/src/ndarray_backend_cpu.cc.o"
+  "/home/duda/project/Sparse-Needle/src/ndarray_backend_cpu.cc" "/home/duda/project/Sparse-Needle/build/CMakeFiles/ndarray_backend_cpu.dir/src/ndarray_backend_cpu.cc.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

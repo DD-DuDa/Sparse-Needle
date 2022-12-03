@@ -5,8 +5,8 @@ from needle.autograd import Tensor
 from needle import ops
 import needle.init as init
 import numpy as np
+from collections import OrderedDict
 from .backend_selection import array_api, NDArray
-
 
 class Parameter(Tensor):
     """A special kind of tensor that represents parameters."""
@@ -60,6 +60,23 @@ class Module:
         """Return the list of parameters in the module."""
         return _unpack_params(self.__dict__)
 
+    def _save_to_state_dict(self, destination, prefix, keep_vars):
+        for i, param in enumerate(self.parameters()):
+            if param is not None:
+                destination[prefix + str(i)] = param if keep_vars else param.detach()
+
+    def state_dict(self, destination=None, prefix='', keep_vars=False):
+        destination = OrderedDict()
+        destination._metadata = OrderedDict()
+        destination._metadata[prefix[:-1]] = local_metadata = dict(version=1)
+        self._save_to_state_dict(destination, prefix, keep_vars)
+        return destination
+
+    def load_state_dict(self, state_dict):
+        for i, param in enumerate(self.parameters()):
+            if param is not None:
+                param.data = state_dict[str(i)]
+
     def _children(self) -> List["Module"]:
         return _child_modules(self.__dict__)
 
@@ -75,6 +92,7 @@ class Module:
 
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
+
 
 
 class Identity(Module):

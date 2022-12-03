@@ -2,8 +2,7 @@ cmake_minimum_required(VERSION 3.2)
 project(needle C CXX)
 
 # find correct version of Python
-execute_process(COMMAND python3-config --prefix
-  OUTPUT_VARIABLE Python_ROOT_DIR)
+execute_process(COMMAND python3-config --prefix OUTPUT_VARIABLE Python_ROOT_DIR)
 find_package(Python COMPONENTS Development Interpreter REQUIRED)
 include_directories(${Python_INCLUDE_DIRS})
 
@@ -15,11 +14,12 @@ execute_process(COMMAND python3 -m pybind11 --cmakedir
 find_package(pybind11 PATHS ${__pybind_path})
 
 
+
 if(NOT MSVC)
-  set(CMAKE_CXX_FLAGS "-std=c++11 -O2 -march=native ${CMAKE_CXX_FLAGS}")
+  set(CMAKE_CXX_FLAGS "-std=c++14 -O2 -march=native ${CMAKE_CXX_FLAGS}")
   set(CMAKE_CUDA_STANDARD 14)
 else()
-  set(CMAKE_CXX_FLAGS "/std:c++11 -O2 -march=native ${CMAKE_CXX_FLAGS}")
+  set(CMAKE_CXX_FLAGS "/std:c++14 -O2 -march=native ${CMAKE_CXX_FLAGS}")
   set(CMAKE_CUDA_STANDARD 14)
 endif()
 

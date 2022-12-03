@@ -501,7 +501,7 @@ void Matmul(const CudaArray& a, const CudaArray& b, CudaArray* out, uint32_t M, 
     // float cublas_beta = 0.0f;
 
     // cublasSgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_N, P, M, N, &cublas_alpha, b.ptr, P, a.ptr, N, &cublas_beta, out->ptr, P);
-    // // delete a;
+    // delete a;    
     // cublasDestroy(cublas_handle);
 }
 

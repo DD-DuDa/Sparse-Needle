@@ -1,10 +1,12 @@
 """The module.
 """
 from typing import List, Callable, Any
+import needle as ndl
 from needle.autograd import Tensor
 from needle import ops
 import needle.init as init
 import numpy as np
+import pickle
 from collections import OrderedDict
 from .backend_selection import array_api, NDArray
 
@@ -49,7 +51,21 @@ def _child_modules(value: object) -> List["Module"]:
     else:
         return []
 
+def save(path, state_dict):
+    f_save = open(path, 'wb')
+    for s in state_dict:
+        state_dict[s] = state_dict[s].numpy()
+    pickle.dump(state_dict, f_save)
+    f_save.close()
 
+def load(path, device=ndl.cpu_numpy()):
+    f_read = open(path, 'rb')
+    ckpt = pickle.load(f_read)
+    f_read.close()
+
+    for c in ckpt:
+        ckpt[c] = ndl.Tensor(ckpt[c], device=device)
+    return ckpt
 
 
 class Module:

@@ -11,3 +11,9 @@ pip install -v --disable-pip-version-check --no-cache-dir --global-option="--per
 
 ```
 
+## Todo
+
+
+## Advance
+* Pruning method choice
+* ?Permute Kernel

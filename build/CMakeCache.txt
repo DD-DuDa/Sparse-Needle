@@ -27,6 +27,24 @@ CMAKE_BUILD_TYPE:STRING=
 //Enable/Disable color output during build.
 CMAKE_COLOR_MAKEFILE:BOOL=ON
 
+//CUDA compiler
+CMAKE_CUDA_COMPILER:FILEPATH=/usr/local/cuda-11.6/bin/nvcc
+
+//Flags used by the CUDA compiler during all build types.
+CMAKE_CUDA_FLAGS:STRING=
+
+//Flags used by the CUDA compiler during DEBUG builds.
+CMAKE_CUDA_FLAGS_DEBUG:STRING=-g
+
+//Flags used by the CUDA compiler during MINSIZEREL builds.
+CMAKE_CUDA_FLAGS_MINSIZEREL:STRING=-O1 -DNDEBUG
+
+//Flags used by the CUDA compiler during RELEASE builds.
+CMAKE_CUDA_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+
+//Flags used by the CUDA compiler during RELWITHDEBINFO builds.
+CMAKE_CUDA_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
+
 //CXX compiler
 CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++
 
@@ -370,7 +388,7 @@ _Python_INCLUDE_DIR:PATH=/home/dudayou/miniconda3/envs/pytorch/include/python3.9
 _Python_LIBRARY_RELEASE:FILEPATH=/home/dudayou/miniconda3/envs/pytorch/lib/libpython3.9.so
 
 //Dependencies for the target
-ndarray_backend_cuda_LIB_DEPENDS:STATIC=general;/usr/local/cuda-11.6/lib64/libcudart_static.a;general;-lpthread;general;dl;general;/usr/lib/x86_64-linux-gnu/librt.so;general;/usr/local/cuda-11.6/lib64/libcudart.so;
+ndarray_backend_cuda_LIB_DEPENDS:STATIC=general;/usr/local/cuda-11.6/lib64/libcudart_static.a;general;-lpthread;general;dl;general;/usr/lib/x86_64-linux-gnu/librt.so;general;cudart;general;cusparse;general;libcusparseLt.so;general;/usr/local/cuda-11.6/targets/x86_64-linux/lib/libnvrtc.so;general;/usr/local/cuda-11.6/lib64/libcudart.so;
 
 //Value Computed by CMake
 needle_BINARY_DIR:STATIC=/home/dudayou/project/Sparse-Needle/build
@@ -406,6 +424,18 @@ CMAKE_COMMAND:INTERNAL=/usr/bin/cmake
 CMAKE_CPACK_COMMAND:INTERNAL=/usr/bin/cpack
 //Path to ctest program executable.
 CMAKE_CTEST_COMMAND:INTERNAL=/usr/bin/ctest
+//ADVANCED property for variable: CMAKE_CUDA_COMPILER
+CMAKE_CUDA_COMPILER-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_CUDA_FLAGS
+CMAKE_CUDA_FLAGS-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_CUDA_FLAGS_DEBUG
+CMAKE_CUDA_FLAGS_DEBUG-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_CUDA_FLAGS_MINSIZEREL
+CMAKE_CUDA_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_CUDA_FLAGS_RELEASE
+CMAKE_CUDA_FLAGS_RELEASE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_CUDA_FLAGS_RELWITHDEBINFO
+CMAKE_CUDA_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_CXX_COMPILER
 CMAKE_CXX_COMPILER-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_CXX_COMPILER_AR
@@ -639,6 +669,8 @@ CUDA_nvToolsExt_LIBRARY-ADVANCED:INTERNAL=1
 CUDA_parse_cubin:INTERNAL=/usr/share/cmake-3.16/Modules/FindCUDA/parse_cubin.cmake
 //Location of run_nvcc.cmake
 CUDA_run_nvcc:INTERNAL=/usr/share/cmake-3.16/Modules/FindCUDA/run_nvcc.cmake
+//CUSPARSELT_PATH
+CUSPARSELT_PATH:INTERNAL=/home/dudayou/download/libcusparse_lt-linux-x86_64-0.3.0.3-archive
 //Details about finding CUDA
 FIND_PACKAGE_MESSAGE_DETAILS_CUDA:INTERNAL=[/usr/local/cuda-11.6][/usr/local/cuda-11.6/bin/nvcc][/usr/local/cuda-11.6/include][/usr/local/cuda-11.6/lib64/libcudart_static.a][v11.6()]
 //Details about finding Python

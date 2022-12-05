@@ -5,6 +5,6 @@ file(REMOVE_RECURSE
 )
 
 # Per-language clean rules from dependency scanning.
-foreach(lang )
+foreach(lang CUDA)
   include(CMakeFiles/ndarray_backend_cuda.dir/cmake_clean_${lang}.cmake OPTIONAL)
 endforeach()

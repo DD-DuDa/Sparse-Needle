@@ -4,6 +4,7 @@
 #include <pybind11/stl.h>
 
 #include <cublas_v2.h>
+#include <cusparseLt.h>       // cusparseLt header
 
 #include <iostream>
 #include <sstream>
@@ -483,6 +484,8 @@ void Matmul(const CudaArray& a, const CudaArray& b, CudaArray* out, uint32_t M, 
    */
 
   /// BEGIN YOUR SOLUTION
+    std::cout << std::endl << "Matmul in cuda" << std::endl;
+
     Fill(out, 0.0f);
     if (M < TILE || P < TILE || N < TILE) {
         dim3 block(TILE, TILE);

@@ -79,7 +79,7 @@ set(CUDA_NVCC_FLAGS_MINSIZEREL  ; )
 set(CUDA_NVCC_FLAGS_RELEASE  ; )
 set(CUDA_NVCC_FLAGS_RELWITHDEBINFO  ; )
 set(nvcc_flags -m64;-Dndarray_backend_cuda_EXPORTS) # list
-set(CUDA_NVCC_INCLUDE_DIRS [==[/usr/local/cuda-11.6/include;/home/dudayou/miniconda3/envs/pytorch/include/python3.9;/home/dudayou/miniconda3/envs/pytorch/lib/python3.9/site-packages/pybind11/include;/home/dudayou/miniconda3/envs/pytorch/include/python3.9;/usr/local/cuda-11.6/include]==]) # list (needs to be in lua quotes to address backslashes)
+set(CUDA_NVCC_INCLUDE_DIRS [==[/usr/local/cuda-11.6/include;/home/dudayou/miniconda3/envs/pytorch/include/python3.9;/home/dudayou/miniconda3/envs/pytorch/lib/python3.9/site-packages/pybind11/include;/home/dudayou/miniconda3/envs/pytorch/include/python3.9;/usr/local/cuda-11.6/include;/usr/local/cuda-11.6/include;/home/dudayou/download/libcusparse_lt-linux-x86_64-0.3.0.3-archive/include]==]) # list (needs to be in lua quotes to address backslashes)
 string(REPLACE "\\" "/" CUDA_NVCC_INCLUDE_DIRS "${CUDA_NVCC_INCLUDE_DIRS}")
 set(CUDA_NVCC_COMPILE_DEFINITIONS [==[]==]) # list (needs to be in lua quotes see #16510 ).
 set(format_flag "-c") # string

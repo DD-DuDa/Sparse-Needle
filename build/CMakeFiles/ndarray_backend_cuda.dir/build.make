@@ -57,6 +57,7 @@ include CMakeFiles/ndarray_backend_cuda.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/ndarray_backend_cuda.dir/flags.make
 
+CMakeFiles/ndarray_backend_cuda.dir/src/ndarray_backend_cuda_generated_ndarray_backend_cuda.cu.o: /home/dudayou/download/libcusparse_lt-linux-x86_64-0.3.0.3-archive/include/cusparseLt.h
 CMakeFiles/ndarray_backend_cuda.dir/src/ndarray_backend_cuda_generated_ndarray_backend_cuda.cu.o: /home/dudayou/miniconda3/envs/pytorch/include/python3.9/Python.h
 CMakeFiles/ndarray_backend_cuda.dir/src/ndarray_backend_cuda_generated_ndarray_backend_cuda.cu.o: /home/dudayou/miniconda3/envs/pytorch/include/python3.9/abstract.h
 CMakeFiles/ndarray_backend_cuda.dir/src/ndarray_backend_cuda_generated_ndarray_backend_cuda.cu.o: /home/dudayou/miniconda3/envs/pytorch/include/python3.9/bltinmodule.h
@@ -513,6 +514,7 @@ CMakeFiles/ndarray_backend_cuda.dir/src/ndarray_backend_cuda_generated_ndarray_b
 CMakeFiles/ndarray_backend_cuda.dir/src/ndarray_backend_cuda_generated_ndarray_backend_cuda.cu.o: /usr/local/cuda-11.6/include/cuda_runtime_api.h
 CMakeFiles/ndarray_backend_cuda.dir/src/ndarray_backend_cuda_generated_ndarray_backend_cuda.cu.o: /usr/local/cuda-11.6/include/cuda_surface_types.h
 CMakeFiles/ndarray_backend_cuda.dir/src/ndarray_backend_cuda_generated_ndarray_backend_cuda.cu.o: /usr/local/cuda-11.6/include/cuda_texture_types.h
+CMakeFiles/ndarray_backend_cuda.dir/src/ndarray_backend_cuda_generated_ndarray_backend_cuda.cu.o: /usr/local/cuda-11.6/include/cusparse.h
 CMakeFiles/ndarray_backend_cuda.dir/src/ndarray_backend_cuda_generated_ndarray_backend_cuda.cu.o: /usr/local/cuda-11.6/include/device_atomic_functions.h
 CMakeFiles/ndarray_backend_cuda.dir/src/ndarray_backend_cuda_generated_ndarray_backend_cuda.cu.o: /usr/local/cuda-11.6/include/device_atomic_functions.hpp
 CMakeFiles/ndarray_backend_cuda.dir/src/ndarray_backend_cuda_generated_ndarray_backend_cuda.cu.o: /usr/local/cuda-11.6/include/device_launch_parameters.h
@@ -562,6 +564,7 @@ ndarray_backend_cuda_EXTERNAL_OBJECTS = \
 ../python/needle/backend_ndarray/ndarray_backend_cuda.cpython-39-x86_64-linux-gnu.so: CMakeFiles/ndarray_backend_cuda.dir/build.make
 ../python/needle/backend_ndarray/ndarray_backend_cuda.cpython-39-x86_64-linux-gnu.so: /usr/local/cuda-11.6/lib64/libcudart_static.a
 ../python/needle/backend_ndarray/ndarray_backend_cuda.cpython-39-x86_64-linux-gnu.so: /usr/lib/x86_64-linux-gnu/librt.so
+../python/needle/backend_ndarray/ndarray_backend_cuda.cpython-39-x86_64-linux-gnu.so: /usr/local/cuda-11.6/targets/x86_64-linux/lib/libnvrtc.so
 ../python/needle/backend_ndarray/ndarray_backend_cuda.cpython-39-x86_64-linux-gnu.so: /usr/local/cuda-11.6/lib64/libcudart.so
 ../python/needle/backend_ndarray/ndarray_backend_cuda.cpython-39-x86_64-linux-gnu.so: CMakeFiles/ndarray_backend_cuda.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/dudayou/project/Sparse-Needle/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX shared module ../python/needle/backend_ndarray/ndarray_backend_cuda.cpython-39-x86_64-linux-gnu.so"

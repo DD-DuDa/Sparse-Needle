@@ -65,6 +65,26 @@ CudaVec VecToCuda(const std::vector<uint32_t>& x) {
   return shape;
 }
 
+#define CHECK_CUDA(func)                                                       \
+{                                                                              \
+    cudaError_t status = (func);                                               \
+    if (status != cudaSuccess) {                                               \
+        printf("CUDA API failed at line %d with error: %s (%d)\n",             \
+               __LINE__, cudaGetErrorString(status), status);                  \
+        return EXIT_FAILURE;                                                   \
+    }                                                                          \
+}
+
+#define CHECK_CUSPARSE(func)                                                   \
+{                                                                              \
+    cusparseStatus_t status = (func);                                          \
+    if (status != CUSPARSE_STATUS_SUCCESS) {                                   \
+        printf("CUSPARSE API failed at line %d with error: %s (%d)\n",         \
+               __LINE__, cusparseGetErrorString(status), status);              \
+        return EXIT_FAILURE;                                                   \
+    }                                                                          \
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Fill call
 ////////////////////////////////////////////////////////////////////////////////
@@ -482,9 +502,136 @@ void Matmul(const CudaArray& a, const CudaArray& b, CudaArray* out, uint32_t M, 
    *   N: columns of a / rows of b
    *   P: columns of b / out
    */
+    /********************* SPARSE ***************************/
+    constexpr int m     = 32; // bigger sizes may require dynamic allocations
+    constexpr int n     = 32; // bigger sizes may require dynamic allocations
+    constexpr int k     = 32; // bigger sizes may require dynamic allocations
+
+    auto          order = CUSPARSE_ORDER_ROW;
+    auto          opA   = CUSPARSE_OPERATION_NON_TRANSPOSE;
+    auto          opB   = CUSPARSE_OPERATION_NON_TRANSPOSE;
+    auto          type  = CUDA_R_32F;
+    auto          compute_type = CUSPARSE_COMPUTE_TF32_FAST;
+
+    bool     is_rowmajor    = (order == CUSPARSE_ORDER_ROW);
+    bool     isA_transposed = (opA != CUSPARSE_OPERATION_NON_TRANSPOSE);
+    bool     isB_transposed = (opB != CUSPARSE_OPERATION_NON_TRANSPOSE);
+    auto     num_A_rows     = (isA_transposed) ? k : m;
+    auto     num_A_cols     = (isA_transposed) ? m : k;
+    auto     num_B_rows     = (isB_transposed) ? n : k;
+    auto     num_B_cols     = (isB_transposed) ? k : n;
+    auto     num_C_rows     = m;
+    auto     num_C_cols     = n;
+    unsigned alignment      = 32;
+    auto     lda            = (is_rowmajor) ? num_A_cols : num_A_rows;
+    auto     ldb            = (is_rowmajor) ? num_B_cols : num_B_rows;
+    auto     ldc            = (is_rowmajor) ? num_C_cols : num_C_rows;
+    auto     A_height       = (is_rowmajor) ? num_A_rows : num_A_cols;
+    auto     B_height       = (is_rowmajor) ? num_B_rows : num_B_cols;
+    auto     C_height       = (is_rowmajor) ? num_C_rows : num_C_cols;
+    auto     A_size         = A_height * lda * sizeof(float);
+    auto     B_size         = B_height * ldb * sizeof(float);
+    auto     C_size         = C_height * ldc * sizeof(float);
+    float hA[m * k];
+    float hB[k * n];
+    float hC[m * n] = {};
+
+    for (int i = 0; i < m * k; i++)
+        hA[i] = static_cast<float>(std::rand() % 10);
+    for (int i = 0; i < k * n; i++)
+        hB[i] = static_cast<float>(std::rand() % 10);
+    float alpha = 1.0f;
+    float beta  = 0.0f;
+    //--------------------------------------------------------------------------
+    // Device memory management
+    float *dA, *dB, *dC, *dD, *dA_compressed;
+    int    *d_valid;
+    cudaMalloc((void**) &dA, A_size);
+    cudaMalloc((void**) &dB, B_size);
+    cudaMalloc((void**) &dC, C_size);
+    cudaMalloc((void**) &d_valid, sizeof(int));
+    dD = dC;
+    
+    cudaMemcpy(dA, hA, A_size, cudaMemcpyHostToDevice);
+    cudaMemcpy(dB, hB, B_size, cudaMemcpyHostToDevice);
+    cudaMemcpy(dC, hC, C_size, cudaMemcpyHostToDevice);
+    //--------------------------------------------------------------------------
+    cusparseLtHandle_t             handle;
+    cusparseLtMatDescriptor_t      matA, matB, matC;
+    cusparseLtMatmulDescriptor_t   matmul;
+    cusparseLtMatmulAlgSelection_t alg_sel;
+    cusparseLtMatmulPlan_t         plan;
+    cudaStream_t                   stream = nullptr;
+    cusparseLtInit(&handle);
+    // matrix descriptor initialization
+    cusparseLtStructuredDescriptorInit(
+                                        &handle, &matA, num_A_rows,
+                                        num_A_cols, lda, alignment,
+                                        type, order,
+                                        CUSPARSELT_SPARSITY_50_PERCENT);
+    cusparseLtDenseDescriptorInit(
+                                    &handle, &matB, num_B_rows,
+                                    num_B_cols, ldb, alignment,
+                                    type, order);
+    cusparseLtDenseDescriptorInit(
+                                    &handle, &matC, num_C_rows,
+                                    num_C_cols, ldc, alignment,
+                                    type, order);
+    // matmul, algorithm selection, and plan initialization
+    cusparseLtMatmulDescriptorInit(
+                                    &handle, &matmul, opA, opB,
+                                    &matA, &matB, &matC, &matC,
+                                    compute_type);
+    cusparseLtMatmulAlgSelectionInit(
+                                    &handle, &alg_sel, &matmul,
+                                    CUSPARSELT_MATMUL_ALG_DEFAULT);
+    int alg = 0;
+    cusparseLtMatmulAlgSetAttribute(
+                                    &handle, &alg_sel,
+                                    CUSPARSELT_MATMUL_ALG_CONFIG_ID,
+                                    &alg, sizeof(alg));
+
+    // Get workspace
+    size_t workspace_size;
+
+    cusparseLtMatmulPlanInit(&handle, &plan, &matmul, &alg_sel, workspace_size);
+
+    cusparseLtMatmulGetWorkspace(&handle, &plan,
+                                                 &workspace_size);
+
+    //--------------------------------------------------------------------------
+    // Prune the A matrix (in-place) and check the correcteness
+    cusparseLtSpMMAPrune(&handle, &matmul, dA, dA,
+                                         CUSPARSELT_PRUNE_SPMMA_TILE, stream);
+    cusparseLtSpMMAPruneCheck(&handle, &matmul, dA,
+                                              d_valid, stream);
+    int is_valid;
+    cudaMemcpyAsync(&is_valid, d_valid, sizeof(int),
+                                cudaMemcpyDeviceToHost, stream);
+    cudaStreamSynchronize(stream);
+
+    std::cout << "is_valid:" << is_valid << std::endl;
+    if (is_valid != 0) {
+        std::printf("!!!! The matrix has been pruned in a wrong way. "
+                    "cusparseLtMatmul will not provide correct results\n");
+        return ;
+    }
+
+    cusparseLtMatDescriptorDestroy(&matA);
+    cusparseLtMatDescriptorDestroy(&matB);
+    cusparseLtMatDescriptorDestroy(&matC);
+    cusparseLtMatmulPlanDestroy(&plan);
+    cusparseLtDestroy(&handle);
+
+    cudaFree(dA_compressed);
+    cudaFree(dA);
+    cudaFree(dB);
+    cudaFree(dC);
+    cudaFree(d_valid);
+    /********************* SPARSE ***************************/
 
   /// BEGIN YOUR SOLUTION
-    std::cout << std::endl << "Matmul in cuda" << std::endl;
+    // std::cout << std::endl << "Matmul in cuda" << std::endl;
 
     Fill(out, 0.0f);
     if (M < TILE || P < TILE || N < TILE) {
@@ -498,6 +645,8 @@ void Matmul(const CudaArray& a, const CudaArray& b, CudaArray* out, uint32_t M, 
     }
     // cudaDeviceSynchronize();
   /// END YOUR SOLUTION
+
+    
     // cublasHandle_t cublas_handle;
     // cublasCreate(&cublas_handle);
     // float cublas_alpha = 1.0f;
@@ -506,7 +655,10 @@ void Matmul(const CudaArray& a, const CudaArray& b, CudaArray* out, uint32_t M, 
     // cublasSgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_N, P, M, N, &cublas_alpha, b.ptr, P, a.ptr, N, &cublas_beta, out->ptr, P);
     // delete a;    
     // cublasDestroy(cublas_handle);
+
+    
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Max and sum reductions

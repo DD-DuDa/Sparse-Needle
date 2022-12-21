@@ -1,0 +1,83 @@
+# from cmath import sqrt
+from math import sqrt
+import needle as ndl
+import numpy as np
+
+
+def rand(*shape, low=0.0, high=1.0, device=None, dtype="float32", requires_grad=False):
+    """ Generate random numbers uniform between low and high """
+    device = ndl.cpu_numpy() if device is None else device
+    array = device.rand(*shape) * (high - low) + low
+    return ndl.Tensor(array, device=device, dtype=dtype, requires_grad=requires_grad)
+    
+
+def randn(*shape, mean=0.0, std=1.0, device=None, dtype="float32", requires_grad=False):
+    """ Generate random normal with specified mean and std deviation """
+    device = ndl.cpu_numpy() if device is None else device
+    array = device.randn(*shape) * std + mean
+    return ndl.Tensor(array, device=device, dtype=dtype, requires_grad=requires_grad)
+
+
+def constant(*shape, c=1.0, device=None, dtype="float32", requires_grad=False):
+    """ Generate constant Tensor """
+    device = ndl.cpu_numpy() if device is None else device
+    # array = device.ones(*shape, dtype=dtype) * c # note: can change dtype
+    ones = np.ones(shape, dtype=dtype)
+    array = ndl.NDArray(ones, device=device) * c
+    return ndl.Tensor(array, device=device, dtype=dtype, requires_grad=requires_grad)
+
+
+def ones(*shape, device=None, dtype="float32", requires_grad=False):
+    """ Generate all-ones Tensor """
+    return constant(*shape, c=1.0, device=device, dtype=dtype, requires_grad=requires_grad)
+
+
+def zeros(*shape, device=None, dtype="float32", requires_grad=False):
+    """ Generate all-zeros Tensor """
+    return constant(*shape, c=0.0, device=device, dtype=dtype, requires_grad=requires_grad)
+
+
+def randb(*shape, p=0.5, device=None, dtype="bool", requires_grad=False):
+    """ Generate binary random Tensor """
+    device = ndl.cpu_numpy() if device is None else device
+    array = device.rand(*shape) <= p
+    return ndl.Tensor(array, device=device, dtype=dtype, requires_grad=requires_grad)
+
+
+def one_hot(n, i, device=None, dtype="float32", requires_grad=False):
+    """ Generate one-hot encoding Tensor """
+    # device = ndl.cpu_numpy() if device is None else device
+    device = i.device
+    # return ndl.Tensor(device.one_hot(n, i.numpy().astype('int'), dtype=dtype), device=device, requires_grad=requires_grad)
+    return ndl.Tensor(device.one_hot(n, i.numpy().astype('int'), dtype=dtype), device=device, requires_grad=requires_grad)
+
+def xavier_uniform(fan_in, fan_out, gain=1.0, **kwargs):
+    ### BEGIN YOUR SOLUTION
+    alpha = gain * sqrt(6 / (fan_in + fan_out))
+    return rand(fan_in, fan_out, low=-alpha, high=alpha, **kwargs)
+    ### END YOUR SOLUTION
+
+
+def xavier_normal(fan_in, fan_out, gain=1.0, **kwargs):
+    ### BEGIN YOUR SOLUTION
+    std = gain * sqrt(2 / (fan_in + fan_out))
+    return randn(fan_in, fan_out, mean=0.0, std=std, **kwargs)
+    ### END YOUR SOLUTION
+
+
+def kaiming_uniform(fan_in, fan_out, nonlinearity="relu", device=None, **kwargs):
+    assert nonlinearity == "relu", "Only relu supported currently"
+    ### BEGIN YOUR SOLUTION
+    gain = sqrt(2)
+    bound = gain * sqrt(3 / fan_in)
+    return rand(fan_in, fan_out, low=-bound, high=bound, device=device, **kwargs)
+    ### END YOUR SOLUTION
+
+
+def kaiming_normal(fan_in, fan_out, nonlinearity="relu", device=None, **kwargs):
+    assert nonlinearity == "relu", "Only relu supported currently"
+    ### BEGIN YOUR SOLUTION
+    gain = sqrt(2)
+    std = gain * sqrt(1 / fan_in)
+    return randn(fan_in, fan_out, mean=0.0, std=std, device=device, **kwargs)
+    ### END YOUR SOLUTION

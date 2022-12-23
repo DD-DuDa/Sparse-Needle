@@ -37,7 +37,15 @@ def torchNet(dim, hidden_dim=128, num_classes=10):
     net = torch.nn.Sequential(
         torch.nn.Linear(in_features=hidden_dim, out_features=dim), 
         torch.nn.ReLU(), 
-        torch.nn.Linear(in_features=dim, out_features=10)
+        torch.nn.Linear(in_features=dim, out_features=128), 
+        torch.nn.ReLU(), 
+        torch.nn.Linear(in_features=128, out_features=hidden_dim), 
+        torch.nn.ReLU(), 
+        torch.nn.Linear(in_features=hidden_dim, out_features=64),
+        torch.nn.ReLU(), 
+        torch.nn.Linear(in_features=64, out_features=128), 
+        torch.nn.ReLU(), 
+        torch.nn.Linear(in_features=128, out_features=10), 
     )
 
     return net
@@ -50,6 +58,12 @@ def model_to_sparse(ndl_model, device=ndl.cuda()):
     new_Wight = torch.Tensor(ndl_model.parameters()[0].numpy())
     torNet[0].weight = torch.nn.Parameter(new_Wight)
 
+    new_Wight = torch.Tensor(ndl_model.parameters()[2].numpy())
+    torNet[4].weight = torch.nn.Parameter(new_Wight)
+
+    new_Wight = torch.Tensor(ndl_model.parameters()[4].numpy())
+    torNet[8].weight = torch.nn.Parameter(new_Wight)
+
     # new_Wight = torch.Tensor(ndl_model.parameters()[2].transpose().numpy())
     # torNet[2].weight = torch.nn.Parameter(new_Wight)
     """"""
@@ -58,8 +72,9 @@ def model_to_sparse(ndl_model, device=ndl.cuda()):
     ASP.compute_sparse_masks()
 
     """"""
-    ndl_model.parameters()[0].data = ndl.Tensor(torNet.state_dict()['0.weight'].cpu(), device=ndl.cuda())
-    # ndl_model.parameters()[2].data = ndl.Tensor(torNet.state_dict()['2.weight'].t().cpu(), device=ndl.cuda())
+    ndl_model.parameters()[0].data = ndl.Tensor(torNet.state_dict()['0.weight'].cpu(), device=device)
+    ndl_model.parameters()[2].data = ndl.Tensor(torNet.state_dict()['4.weight'].cpu(), device=device)
+    ndl_model.parameters()[4].data = ndl.Tensor(torNet.state_dict()['8.weight'].cpu(), device=device)
     """"""
 
 

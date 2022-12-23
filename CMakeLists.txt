@@ -117,7 +117,7 @@ if(CUDA_FOUND)
   )
 
   target_link_directories(ndarray_backend_cuda
-    PUBLIC ${CUSPARSELT_PATH}/lib64
+    PUBLIC ${CUSPARSELT_PATH}/lib
     PUBLIC ${CUDA_TOOLKIT_PATH}/lib64
   )
 

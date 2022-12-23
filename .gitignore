@@ -4,3 +4,4 @@
 .benchmarks
 *.pyc
 /build
+*.so
